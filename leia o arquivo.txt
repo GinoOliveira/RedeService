@@ -1,2 +1,2 @@
 Obs: Criar as pastas ou alterar o caminho para obter o pleno funcionamento do código.
-C:\\Users\\Anonymous\\Desktop\\RedeService\\RedeService\\RedeService\\wwwroot\\Arquivos
+wwwroot\\Arquivos

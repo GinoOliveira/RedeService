@@ -1,0 +1,204 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+
+}
+
+<div class="container">
+    <div class="row" style="justify-content: space-between;">
+        <div class="col-sm-5 col-md-5 col-5">
+            <h2>Q1 e Q2</h2>
+            <P>
+                1. Faça a aplicação permitir a digitação de números e mostre esses números em tela de forma
+                ordenada.
+            </P>
+            <p>
+                2. Agora grave os números visualizados cada 1 em uma linha em um arquivo texto na pasta raiz da
+                aplicação de nome numeros_ordenar.txt.
+            </p>
+            <div class="form-group">
+                <label>Informe um numero</label>
+                <input id="incluirNumero" type="text" class="form-control" placeholder="...">
+            </div>
+            <p id="pAvisoDeletar"></p>
+            <button id="btnClick" onclick="IncluirNumero()" type="submit" class="btn btn-primary" style="margin-top: 10px;">Adicionar</button>
+            <button onclick="DeletarLista()" type="submit" class="btn btn-danger" style="margin-top: 10px;">Deletar lista</button>
+
+            <div style="padding: 2px; margin-top:10px ; ">
+                <table id="minhaTabela" class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Valor</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td id="dados"></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <button onclick="LerArquivo()" type="submit" class="btn btn-link" style="margin-top: 10px;">Exibir lista e arquivo</button>
+            </div>
+        </div>
+        <div class="col-sm-5 col-md-5 col-5" id="divQ3">
+            <h2>Q3, Q4 e Q5</h2>
+            <P>
+                3. Crie uma lista contendo 100 itens de uma classe de nome clsTeste com as propriedades codigo
+                como número e descricao como texto, os objetos deverão ser criados com a propriedade codigo
+                com números sequenciais (ex: 1,2,3,4,5) e a descricao como a data e hora atual (ex: 2022/10/13
+                08:50:22.123)
+            </P>
+            <p>
+                4. Grave a lista do item 3, em um arquivo de nome data.json na pasta raiz da aplicação.
+            </p>
+            <p>
+                5. Crie um Grid, leia o arquivo data.json que foi gravado, e mostre os dados no Grid criado.
+            </p>
+            <p id="pAviso"></p>
+            <button id="btnCriaArquivoJson" onclick="CriaArquivoJson()" type="submit" class="btn btn-primary" style="margin-top: 10px;">Criar arquivo Json</button>
+            <button onclick="LerArquivoJson()" type="submit" class="btn btn-success" style="margin-top: 10px;">Carregar Grid</button>
+            <table id="tabelaJson" class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Codigo</th>
+                        <th>Descrição</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+</div>
+
+<script>
+
+    function IncluirNumero() {
+        $("#pAvisoDeletar").html('<p id="pAvisoDeletar" style="color:green;" > Valor adicionado.</p>')
+        var incluirNumero = $("#incluirNumero").val()
+        if (incluirNumero != null && incluirNumero != '' && incluirNumero != undefined) {
+            var objetosExistentes = JSON.parse(localStorage.getItem('meusObjetos')) || [];
+            var novoObjeto = { valores: incluirNumero };
+            objetosExistentes.push(novoObjeto);
+            localStorage.setItem('meusObjetos', JSON.stringify(objetosExistentes));
+            $("#incluirNumero").val('')
+            var valoresDaTabela = JSON.parse(localStorage.getItem("meusObjetos"))
+            $("#dados").html('<td id="dados"></td>')
+            var arr = [];
+            for (var i = 0; i < valoresDaTabela.length; i++) {
+                var valor = valoresDaTabela[i].valores;
+                arr.push(valor)
+
+            }
+            arr.sort(function (a, b) {
+                return a - b;
+            })
+            console.log(arr)
+            for (var i = 0; i < arr.length; i++) {
+                var valor = `${arr[i]}\n`;
+                $("#dados").append(`<td id="dados" style="display: flex; flex-direction column;" >${valor}</td>`)
+
+            }
+            CriarArquivoTxt(arr)
+        } else {
+            alert("Inclua um valor.")
+        }
+
+    }
+
+    function DeletarLista() {
+        $("#pAvisoDeletar").html('<p id="pAvisoDeletar" style="color:red;" > Arquivos deletados. </p>')
+        localStorage.clear();
+        MostrarLista();
+    }
+
+    function MostrarLista() {
+        var valoresDaTabela = JSON.parse(localStorage.getItem("meusObjetos"))
+        $("#dados").html('<td id="dados"></td>')
+        var arr = [];
+        for (var i = 0; i < valoresDaTabela.length; i++) {
+            var valor = valoresDaTabela[i].valores;
+            arr.push(valor)
+
+        }
+        arr.sort(function (a, b) {
+            return a - b;
+        })
+        console.log(arr)
+        for (var i = 0; i < arr.length; i++) {
+            var valor = arr[i];
+            $("#dados").append(`<td id="dados" style="display: flex; flex-direction column;" >${valor}</td>`)
+        }
+
+    }
+
+    function CriarArquivoTxt(dados) {
+
+        $.get(`@(Url.Action("CriarArquivo", "Home"))/${dados}`, function (data) {
+
+        });
+    }
+    function LerArquivo() {
+        $.get(`@(Url.Action("LerArquivo", "Home"))`, function (data) {
+            MostrarLista()
+        });
+    }
+
+    function CriaArquivoJson() {
+        $.get(`@(Url.Action("CriarJson", "Teste"))`, function (data) {
+            $("#pAviso").html(`<p id="pAviso" style="color: green;" >Arquivo criado com sucesso!!!</p>`)
+
+        });
+    }
+    function LerArquivoJson() {
+
+        $.get(`@(Url.Action("LerArquivoJson", "Teste"))`, function (data) {
+            $("#pAviso").html(`<p id="pAviso" style="color: green;" >Arquivos carregados.</p>`)
+            var dados = JSON.parse(data)
+            var table = $('#tabelaJson').DataTable({
+                destroy: true,
+                "aaData": dados,
+                "aoColumns": [
+                    { "mDataProp": "codigo", },
+                    { "mDataProp": "descricao", }
+                ],
+                paging: false,
+                scrollX: true,
+                scrollY: "200px",
+                autoWidth: false,
+                searching: false,
+                scrollCollapse: true,
+                pageLength: 25,
+                order: [],
+                language: {
+                    emptyTable: "Nenhum registro encontrado",
+                    info: `Total: ${dados.length} `,
+                    infoEmpty: `Total: ${dados.length} `,
+                    infoFiltered: "de MAX filtrados",
+                    infoPostFix: "",
+                    thousands: ".",
+                    lengthMenu: "MENU resultados por página",
+                    loadingRecords: "Carregando...",
+                    processing: "Processando...",
+                    zeroRecords: "Nenhum registro encontrado",
+                    paginate: {
+                        next: "Próximo",
+                        previous: "Anterior",
+                        first: "Primeiro",
+                        last: "Último"
+                    },
+                    aria: {
+                        sortAscending: ": Ordenar colunas de forma ascendente",
+                        sortDescending: ": Ordenar colunas de forma descendente"
+                    },
+                },
+                error: function (params) {
+                    console.log("error")
+                    console.log(params)
+                }
+
+            });
+        });
+    }
+
+</script>

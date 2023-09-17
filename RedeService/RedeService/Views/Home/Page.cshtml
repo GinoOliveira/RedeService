@@ -1,0 +1,329 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+
+}
+
+<div class="container">
+    <div class="row" style="justify-content: space-between;">
+        <div class="col-sm-12 col-md-12 col-12">
+            <h2>Q6</h2>
+            <P>
+                6. Consuma o webservice dos correios passando um CEP qualquer e mostre em tela o endereço que o
+                mesmo retornar.
+                Endereço: https://apps.correios.com.br/SigepMasterJPA/AtendeClienteService/AtendeCliente?wsdl
+                Método: consultaCEP
+            </P>
+            <div class="form-group col-3">
+                <label id="mensagemCep">Informe um CEP válido</label>
+                <input id="cep" type="text" class="form-control " placeholder="ex. 07130-000">
+            </div>
+            <p id="pAvisoDeletar"></p>
+            <button id="btnClick" onclick="BuscarCep()" type="submit" class="btn btn-primary" style="margin-top: 10px;">Buscar Cep</button>
+
+            <div style="padding: 2px; margin-top:10px ; ">
+                <table id="tabelaCep" class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Logradouro</th>
+                            <th>Bairro</th>
+                            <th>Localidade</th>
+                            <th>Uf</th>
+                            <th>Complemento</th>
+                            <th>Cep</th>
+                            <th>DDD</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td id="dados"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+    <div class="row">
+        <div class="col-sm-12 col-md-12 col-12" id="divQ3">
+            <h2>Q7</h2>
+            <P>
+                7. Consuma a API para buscar a lista de bancos brasileiros
+                Documentação: https://brasilapi.com.br/docs#tag/BANKS/paths/~1banks~1v1/get
+                URL: https://brasilapi.com.br/api/banks/v1
+                Mostre os dados de retorno da API em um Grid.
+            </P>
+            <p id="pAviso"></p>
+            <button onclick="CarregarListaComBancos()" type="submit" class="btn btn-success" style="margin-top: 10px;">Consultar bancos</button>
+            <table id="tabelaBancos" class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Ispb</th>
+                        <th>Nome</th>
+                        <th>Codigo</th>
+                        <th>Nome completo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-5 col-md-5 col-5" id="divQ3">
+            <h2>Q8</h2>
+            <P>
+                8. Pela aplicação faça o download da imagem https://redeservice.com.br/wpcontent/uploads/2020/07/redeservice-logo.png, colocar na pasta do sistema, e criar alguma
+                função para ler essa imagem e mostrar em tela no formato base64
+            </P>
+            <p id="pAvisoArquivo"></p>
+            <button onclick="BuscarImagem()" type="submit" class="btn btn-primary" style="margin-top: 10px;">Baixar imagem e gravar</button>
+            <textarea id="buscarImagem" type="text" class="form-control " style="margin-top: 10px; height: 300px; "></textarea>
+        </div>
+
+    </div>
+</div>
+
+<script>
+
+    function BuscarCep() {
+        var cep = $("#cep").val()
+        cep = cep.replace('-', '')
+        const apiUrl = `https://viacep.com.br/ws/${cep}/json/`;
+        $("#cep").val('')
+        // Função para fazer a solicitação à API
+        function fetchUsers() {
+            fetch(apiUrl)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Erro na solicitação da API');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log(data)
+                    $("#mensagemCep").html(`<label id="mensagemCep" >Informe um CEP válido</label>`)
+                    var dados = [data]
+                    var table = $('#tabelaCep').DataTable({
+                        destroy: true,
+                        "aaData": dados,
+                        "aoColumns": [
+                            { "data": "logradouro" },
+                            { "data": "bairro", },
+                            { "data": "localidade", },
+                            { "data": "uf", },
+                            { "data": "complemento", },
+                            { "data": "cep", },
+                            { "data": "ddd", }
+                        ],
+                        paging: false,
+                        scrollX: true,
+                        scrollY: "200px",
+                        autoWidth: false,
+                        searching: false,
+                        scrollCollapse: true,
+                        pageLength: 25,
+                        order: [],
+                        language: {
+                            emptyTable: "Nenhum registro encontrado",
+                            info: `Total: ${dados.length} `,
+                            infoEmpty: `Total: ${dados.length} `,
+                            infoFiltered: "de MAX filtrados",
+                            infoPostFix: "",
+                            thousands: ".",
+                            lengthMenu: "MENU resultados por página",
+                            loadingRecords: "Carregando...",
+                            processing: "Processando...",
+                            zeroRecords: "Nenhum registro encontrado",
+                            paginate: {
+                                next: "Próximo",
+                                previous: "Anterior",
+                                first: "Primeiro",
+                                last: "Último"
+                            },
+                            aria: {
+                                sortAscending: ": Ordenar colunas de forma ascendente",
+                                sortDescending: ": Ordenar colunas de forma descendente"
+                            },
+                        },
+                    });
+
+                })
+                .catch(error => {
+                    var dadosVazio = []
+                    $("#mensagemCep").html(`<label id="mensagemCep" style="color: red;"  >Informe um CEP válido</label>`)
+                    console.error('Erro:', error);
+                    var table = $('#tabelaCep').DataTable({
+                        destroy: true,
+                        "aaData": dadosVazio,
+                        "aoColumns": [
+                            { "data": "logradouro" },
+                            { "data": "bairro", },
+                            { "data": "localidade", },
+                            { "data": "uf", },
+                            { "data": "complemento", },
+                            { "data": "cep", },
+                            { "data": "ddd", }
+                        ],
+                        paging: false,
+                        scrollX: true,
+                        scrollY: "200px",
+                        autoWidth: false,
+                        searching: false,
+                        scrollCollapse: true,
+                        pageLength: 25,
+                        order: [],
+                        language: {
+                            emptyTable: "Nenhum registro encontrado",
+                            info: `Total: ${dadosVazio.length} `,
+                            infoEmpty: `Total: ${dadosVazio.length} `,
+                            infoFiltered: "de MAX filtrados",
+                            infoPostFix: "",
+                            thousands: ".",
+                            lengthMenu: "MENU resultados por página",
+                            loadingRecords: "Carregando...",
+                            processing: "Processando...",
+                            zeroRecords: "Nenhum registro encontrado",
+                            paginate: {
+                                next: "Próximo",
+                                previous: "Anterior",
+                                first: "Primeiro",
+                                last: "Último"
+                            },
+                            aria: {
+                                sortAscending: ": Ordenar colunas de forma ascendente",
+                                sortDescending: ": Ordenar colunas de forma descendente"
+                            },
+                        },
+                    });
+                });
+        }
+        fetchUsers();
+    }
+
+    function CarregarListaComBancos() {
+        const apiUrl = `https://brasilapi.com.br/api/banks/v1`;
+        function fetchUsers() {
+            fetch(apiUrl)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Erro na solicitação da API');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log(data)
+                    $("#mensagemCep").html(`<label id="mensagemCep" >Informe um CEP válido</label>`)
+                    var table = $('#tabelaBancos').DataTable({
+                        destroy: true,
+                        "aaData": data,
+                        "aoColumns": [
+                            {
+                                "mDataProp": "ispb", "defaultContent": "-",
+                                "targets": "_all"
+                            },
+                            {
+                                "mDataProp": "name", "defaultContent": "-",
+                                "targets": "_all"
+                            },
+                            {
+                                "mDataProp": "code", "defaultContent": "-",
+                                "targets": "_all"
+                            },
+                            {
+                                "mDataProp": "fullName", "defaultContent": "-",
+                                "targets": "_all"
+                            }
+                        ],
+                        paging: false,
+                        scrollX: true,
+                        scrollY: "200px",
+                        autoWidth: false,
+                        searching: false,
+                        scrollCollapse: true,
+                        pageLength: 25,
+                        order: [],
+                        language: {
+                            emptyTable: "Nenhum registro encontrado",
+                            info: `Total: ${data.length} `,
+                            infoEmpty: `Total: ${data.length} `,
+                            infoFiltered: "de MAX filtrados",
+                            infoPostFix: "",
+                            thousands: ".",
+                            lengthMenu: "MENU resultados por página",
+                            loadingRecords: "Carregando...",
+                            processing: "Processando...",
+                            zeroRecords: "Nenhum registro encontrado",
+                            paginate: {
+                                next: "Próximo",
+                                previous: "Anterior",
+                                first: "Primeiro",
+                                last: "Último"
+                            },
+                            aria: {
+                                sortAscending: ": Ordenar colunas de forma ascendente",
+                                sortDescending: ": Ordenar colunas de forma descendente"
+                            },
+                            columnDefs: [{
+                                "defaultContent": "-",
+                                "targets": "_all"
+                            }]
+                        },
+                    });
+
+                })
+                .catch(error => {
+                    var dadosVazio = []
+                    $("#mensagemCep").html(`<label id="mensagemCep" style="color: red;"  >Informe um CEP válido</label>`)
+                    console.error('Erro:', error);
+                    var table = $('#tabelaCep').DataTable({
+                        destroy: true,
+                        "aaData": dadosVazio,
+                        "aoColumns": [
+
+                        ],
+                        paging: false,
+                        scrollX: true,
+                        scrollY: "200px",
+                        autoWidth: false,
+                        searching: false,
+                        scrollCollapse: true,
+                        pageLength: 25,
+                        order: [],
+                        language: {
+                            emptyTable: "Nenhum registro encontrado",
+                            info: `Total: ${dadosVazio.length} `,
+                            infoEmpty: `Total: ${dadosVazio.length} `,
+                            infoFiltered: "de MAX filtrados",
+                            infoPostFix: "",
+                            thousands: ".",
+                            lengthMenu: "MENU resultados por página",
+                            loadingRecords: "Carregando...",
+                            processing: "Processando...",
+                            zeroRecords: "Nenhum registro encontrado",
+                            paginate: {
+                                next: "Próximo",
+                                previous: "Anterior",
+                                first: "Primeiro",
+                                last: "Último"
+                            },
+                            aria: {
+                                sortAscending: ": Ordenar colunas de forma ascendente",
+                                sortDescending: ": Ordenar colunas de forma descendente"
+                            },
+                        },
+                    });
+                });
+        }
+        fetchUsers();
+    }
+
+    function BuscarImagem() {
+        $.get(`@(Url.Action("BuscarImagem", "Teste"))`, function (data) {
+            $("#buscarImagem").html(`${data}`)
+
+        });
+
+    }
+
+</script>
